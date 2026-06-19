@@ -17,9 +17,13 @@ export async function createClient() {
             options?: Record<string, unknown>;
           }[],
         ) => {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options),
-          );
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options),
+            );
+          } catch {
+            console.log("error in cookies");
+          }
         },
       },
     },
