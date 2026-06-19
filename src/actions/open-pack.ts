@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 export type Rarity = "legendario" | "epico" | "raro" | "infrecuente" | "comun";
 
 export interface Card {
+  imagen_url: string;
   id: string;
   name: string;
   position: string;
