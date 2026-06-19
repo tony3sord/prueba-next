@@ -126,11 +126,14 @@ export async function openPack(): Promise<OpenPackResult> {
     card_id: card.id,
   }));
 
-  const { error: insertError } = await supabase
+  const { error } = await supabase
     .from("user_cards")
-    .insert(userCardsToInsert);
+    .upsert(userCardsToInsert, {
+      onConflict: "user_id,card_id",
+      ignoreDuplicates: true,
+    });
 
-  if (insertError) {
+  if (error) {
     return { cards: [], error: "Error al guardar las cartas" };
   }
 
