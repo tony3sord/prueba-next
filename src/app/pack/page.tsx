@@ -46,7 +46,9 @@ export default async function PackPage() {
 
       {/* ── CONTENIDO ────────────────────────────────────────── */}
       <section className="flex flex-col items-center justify-center flex-1 px-6 py-16 gap-4">
-        <h1 className="text-3xl font-black text-center">Abrí tu sobre</h1>
+        <h1 className="text-3xl font-black text-center">
+          Abre tu sobre y probemos suerte
+        </h1>
         <p className="text-zinc-500 text-sm mb-6">
           5 cartas por sobre · probabilidades reales
         </p>
