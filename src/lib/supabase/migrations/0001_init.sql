@@ -57,6 +57,10 @@ create policy "user_cards_insert"
   with check (user_id = auth.uid());
 
 
+ALTER TABLE user_cards
+ADD CONSTRAINT user_cards_user_id_card_id_key
+UNIQUE (user_id, card_id);
+
 -- =============================================================
 -- SEED — Plantel Argentina Qatar 2022
 --
@@ -86,21 +90,21 @@ insert into public.cards (name, position, club, rarity, rarity_probability, rati
 -- RARO (10%)
 -- -------------------------
 ('Rodrigo De Paul',      'MED', 'Atlético de Madrid',  'raro',        0.10, 83, 0, 'https://uniqrenders.com/Uploads/25-9-2024/5705/preview-rodrigo-de-paul-argentina-national-football-team-conmebol-argentina-argentine-footballers-render.jpg'),
-('Alexis Mac Allister',  'MED', 'Brighton',            'raro',        0.10, 82, 1, DEFAULT),
-('Enzo Fernández',       'MED', 'Benfica',             'raro',        0.10, 82, 1, DEFAULT),
+('Alexis Mac Allister',  'MED', 'Brighton',            'raro',        0.10, 82, 1, 'https://uniqrenders.com/Uploads/3-8-2024/5139/preview-alexis-mac-allister-argentina-national-football-team-conmebol-argentina-argentina-footballers-render.jpg'),
+('Enzo Fernández',       'MED', 'Benfica',             'raro',        0.10, 82, 1, 'https://i.pinimg.com/564x/e2/68/85/e26885357768c103de07d6e17cff4363.jpg'),
 ('Julián Álvarez',       'DEL', 'Manchester City',     'raro',        0.10, 82, 4, 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/e10449ee-7770-4f46-ac9f-dcae890ef6ea/dhufo4n-2843fb97-cfe8-483d-b647-7f6d766ef9b1.jpg/v1/fill/w_500,h_667,q_75,strp/julian_alvarez_argentina_national_football_team_co_by_uniqrenders_dhufo4n-fullview.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9NjY3IiwicGF0aCI6Ii9mL2UxMDQ0OWVlLTc3NzAtNGY0Ni1hYzlmLWRjYWU4OTBlZjZlYS9kaHVmbzRuLTI4NDNmYjk3LWNmZTgtNDgzZC1iNjQ3LTdmNmQ3NjZlZjliMS5qcGciLCJ3aWR0aCI6Ijw9NTAwIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmltYWdlLm9wZXJhdGlvbnMiXX0.x7ENmCWMFTVKBgzDZ4YuFyK3ajpgx9plkupyYuH8zSg'),
 
 -- -------------------------
 -- INFRECUENTE (25%)
 -- -------------------------
-('Nahuel Molina',        'DEF', 'Atlético de Madrid',  'infrecuente', 0.25, 79, 1, DEFAULT),
-('Gonzalo Montiel',      'DEF', 'Sevilla',             'infrecuente', 0.25, 77, 0, DEFAULT),
-('Cristian Romero',      'DEF', 'Tottenham',           'infrecuente', 0.25, 81, 0, DEFAULT),
-('Lisandro Martínez',    'DEF', 'Manchester United',   'infrecuente', 0.25, 81, 0, DEFAULT),
+('Nahuel Molina',        'DEF', 'Atlético de Madrid',  'infrecuente', 0.25, 79, 1, 'https://uniqrenders.com/Uploads/26-12-2022/1135/preview-nahuel-molina-argentina-national-football-team-conmebol-argentina-argentine-footballers-render.jpg'),
+('Gonzalo Montiel',      'DEF', 'Sevilla',             'infrecuente', 0.25, 77, 0, 'https://uniqrenders.com/Uploads/6-1-2023/1247/preview-gonzalo-montiel-argentina-national-football-team-conmebol-argentina-argentine-footballers-render.jpg'),
+('Cristian Romero',      'DEF', 'Tottenham',           'infrecuente', 0.25, 81, 0, 'https://uniqrenders.com/Uploads/25-2-2024/4993/preview-cristian-romero-argentina-national-football-team-conmebol-argentina-footballers-render.jpg'),
+('Lisandro Martínez',    'DEF', 'Manchester United',   'infrecuente', 0.25, 81, 0, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR7w_iKNrpRhhNul_6NlIINsXpaaNkbVo8PAQ&s'),
 ('Nicolás Tagliafico',   'DEF', 'Lyon',                'infrecuente', 0.25, 78, 0, DEFAULT),
-('Leandro Paredes',      'MED', 'Juventus',            'infrecuente', 0.25, 78, 0, DEFAULT),
-('Lautaro Martínez',     'DEL', 'Inter de Milán',      'infrecuente', 0.25, 83, 0, DEFAULT),
-('Paulo Dybala',         'DEL', 'Roma',                'infrecuente', 0.25, 84, 0, DEFAULT),
+('Leandro Paredes',      'MED', 'Juventus',            'infrecuente', 0.25, 78, 0, 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/e10449ee-7770-4f46-ac9f-dcae890ef6ea/dfm6o2w-ca215edc-562c-4a3b-9392-5cd05bcb1e9e.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiIvZi9lMTA0NDllZS03NzcwLTRmNDYtYWM5Zi1kY2FlODkwZWY2ZWEvZGZtNm8ydy1jYTIxNWVkYy01NjJjLTRhM2ItOTM5Mi01Y2QwNWJjYjFlOWUuanBnIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.HVtNkvkckWwRig_Y0bq8YhI4_gvBbWFNyceceQQMQ3A'),
+('Lautaro Martínez',     'DEL', 'Inter de Milán',      'infrecuente', 0.25, 83, 0, 'https://uniqrenders.com/Uploads/17-11-2024/6211/preview-lautaro-martinez-argentina-national-football-team-conmebol-argentina-argentine-footballers-render.jpg'),
+('Paulo Dybala',         'DEL', 'Roma',                'infrecuente', 0.25, 84, 0, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTXUZJLmbyDm0hhOvxZ4S6PbLAqvQhIcLcWzQ&s'),
 ('Franco Armani',        'POR', 'River Plate',         'infrecuente', 0.25, 77, 0, DEFAULT),
 
 -- -------------------------
