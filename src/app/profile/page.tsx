@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { CardDisplay } from "@/components/CardDisplay";
 import { TeamBuilder } from "@/components/TeamBuilder";
 import type { Card, Rarity } from "@/actions/open-pack";
+import { Link as HeroLink } from "@heroui/react";
+import { getTeam } from "@/actions/team";
 
 export const dynamic = "force-dynamic";
 
@@ -73,6 +75,12 @@ export default async function ProfilePage() {
     { legendario: [], epico: [], raro: [], infrecuente: [], comun: [] },
   );
 
+  //Cargar el equipo del user para pasarle al team builder
+  const savedTeam = await getTeam();
+  const initialTeam = Object.fromEntries(
+    savedTeam.map(({ position, card_id }) => [position, card_id]),
+  );
+
   // ── Stats ──────────────────────────────────────────────────
   const total = collection.length;
   const unique = new Set(collection.map(({ cards }) => cards.id)).size;
@@ -81,22 +89,24 @@ export default async function ProfilePage() {
   return (
     <main className="min-h-screen bg-zinc-950 text-white">
       {/* ── HEADER ─────────────────────────────────────────── */}
-      <header className="flex items-center justify-between px-6 py-5 border-b border-zinc-800">
-        <Link
+      <header className="flex items-center justify-between px-6 py-5 border-b border-zinc-800 bg-zinc-950 sticky top-0 z-40 backdrop-blur-md">
+        <HeroLink
           href="/"
           className="text-zinc-500 hover:text-white text-sm transition-colors"
         >
           ← Inicio
-        </Link>
-        <span className="text-sm font-medium">
-          Este es tu colección, {name}!
+        </HeroLink>
+
+        <span className="text-sm font-medium text-white">
+          Esta es tu colección, {name}!
         </span>
-        <Link
+
+        <HeroLink
           href="/pack"
           className="text-sm text-sky-400 hover:text-sky-300 font-medium transition-colors"
         >
           Abrir sobre →
-        </Link>
+        </HeroLink>
       </header>
       <div className="flex flex-col lg:flex-row gap-32 justify-between items-start px-0 py-10 w-full">
         {/* Columna izquierda — colección */}
@@ -153,7 +163,10 @@ export default async function ProfilePage() {
         {/* Columna derecha — campo */}
         <div className="w-full lg:w-[640px] flex-shrink-0 sticky top-6 pr-16">
           <h2 className="text-lg font-black text-white mb-4">Mi 11 ideal</h2>
-          <TeamBuilder cards={collection.map(({ cards }) => cards)} />
+          <TeamBuilder
+            cards={collection.map(({ cards }) => cards)}
+            initialTeam={initialTeam}
+          />
         </div>
       </div>
     </main>
