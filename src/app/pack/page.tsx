@@ -52,7 +52,9 @@ export default async function PackPage() {
         <p className="text-zinc-500 text-sm mb-6">
           5 cartas por sobre · probabilidades reales
         </p>
-
+        <p className="text-zinc-500 text-sm mb-6">
+          Solo se puede abrir 5 sobres por día
+        </p>
         {/* PackAnimation es Client Component — maneja toda la interacción */}
         <PackAnimation />
       </section>
