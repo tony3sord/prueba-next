@@ -143,3 +143,21 @@ create policy "pack_opens_insert"
   on public.pack_opens for insert
   to authenticated
   with check (user_id = auth.uid());
+create table user_team (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete cascade not null,
+  position varchar(10) not null,
+  card_id uuid references cards(id) on delete set null,  -- uuid, no integer
+  updated_at timestamptz default now(),
+  unique(user_id, position)
+);
+
+alter table user_team enable row level security;
+
+create policy "usuarios ven su propio equipo"
+  on user_team for select
+  using (auth.uid() = user_id);
+
+create policy "usuarios gestionan su propio equipo"
+  on user_team for all
+  using (auth.uid() = user_id);
