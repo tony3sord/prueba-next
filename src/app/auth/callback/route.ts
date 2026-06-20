@@ -18,6 +18,12 @@ export async function GET(request: NextRequest) {
     if (!exchangeError) {
       return NextResponse.redirect(`${origin}/pack`);
     }
+
+    return NextResponse.redirect(
+      `${origin}/login?error=${encodeURIComponent(
+        exchangeError.message ?? "oauth_failed",
+      )}`,
+    );
   }
 
   return NextResponse.redirect(`${origin}/login`);
