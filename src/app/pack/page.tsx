@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PackAnimation } from "@/components/PackAnimation";
+import { LogoutButton } from "@/components/LogoutButton";
 
 // Forzar renderizado dinámico — nunca cachear una página con sesión
 export const dynamic = "force-dynamic";
@@ -36,12 +37,15 @@ export default async function PackPage() {
           Hola, <span className="text-white font-medium">{name}</span> 🇦🇷
         </span>
 
-        <Link
-          href="/profile"
-          className="text-sm text-sky-400 hover:text-sky-300 transition-colors font-medium"
-        >
-          Mi colección →
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link
+            href="/profile"
+            className="text-sm text-sky-400 hover:text-sky-300 transition-colors font-medium"
+          >
+            Mi colección →
+          </Link>
+          <LogoutButton />
+        </div>
       </header>
 
       {/* ── CONTENIDO ────────────────────────────────────────── */}

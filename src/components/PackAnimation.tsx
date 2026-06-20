@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { openPack, type Card } from "@/actions/open-pack";
+import { openPack } from "@/actions/open-pack";
+import type { Card } from "@/types/cards";
 import { CardDisplay } from "./CardDisplay";
 import { Button } from "@heroui/react";
 
