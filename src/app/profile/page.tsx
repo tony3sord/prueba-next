@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { CardDisplay } from "@/components/CardDisplay";
+import { TeamBuilder } from "@/components/TeamBuilder";
 import type { Card, Rarity } from "@/actions/open-pack";
 
 export const dynamic = "force-dynamic";
@@ -97,57 +98,63 @@ export default async function ProfilePage() {
           Abrir sobre →
         </Link>
       </header>
+      <div className="flex flex-col lg:flex-row gap-32 justify-between items-start px-0 py-10 w-full">
+        {/* Columna izquierda — colección */}
+        <div className="flex flex-col gap-10 flex-1 min-w-0 max-w-2xl pl-16">
+          {/* STATS */}
+          <section className="flex flex-wrap gap-4">
+            <StatCard label="Cartas totales" value={total} />
+            <StatCard label="Jugadores únicos" value={unique} />
+            <StatCard
+              label="Legendarios"
+              value={grouped.legendario.length}
+              highlight={grouped.legendario.length > 0}
+            />
+          </section>
 
-      <div className="max-w-4xl mx-auto px-6 py-10 flex flex-col gap-10">
-        {/* ── STATS ──────────────────────────────────────────── */}
-        <section className="flex flex-wrap gap-4">
-          <StatCard label="Cartas totales" value={total} />
-          <StatCard label="Jugadores únicos" value={unique} />
-          <StatCard
-            label="Legendarios"
-            value={grouped.legendario.length}
-            highlight={grouped.legendario.length > 0}
-          />
-        </section>
+          {/* COLECCIÓN VACÍA */}
+          {total === 0 && (
+            <div className="flex flex-col items-center gap-4 py-20 text-center">
+              <span className="text-6xl">📦</span>
+              <p className="text-zinc-400">Todavía no tenés cartas.</p>
+              <Link
+                href="/pack"
+                className="px-6 py-2.5 rounded-full bg-sky-500 hover:bg-sky-400 text-white font-bold text-sm transition-colors"
+              >
+                Abrir primer sobre
+              </Link>
+            </div>
+          )}
 
-        {/* ── COLECCIÓN VACÍA ────────────────────────────────── */}
-        {total === 0 && (
-          <div className="flex flex-col items-center gap-4 py-20 text-center">
-            <span className="text-6xl">📦</span>
-            <p className="text-zinc-400">Todavía no tenés cartas.</p>
-            <Link
-              href="/pack"
-              className="px-6 py-2.5 rounded-full bg-sky-500 hover:bg-sky-400 text-white font-bold text-sm transition-colors"
-            >
-              Abrir primer sobre
-            </Link>
-          </div>
-        )}
+          {/* COLECCIÓN AGRUPADA */}
+          {RARITY_ORDER.map((rarity) => {
+            const cards = grouped[rarity];
+            if (!cards.length) return null;
+            return (
+              <section key={rarity} className="flex flex-col gap-4">
+                <div className="flex items-baseline gap-3">
+                  <h2 className={`text-lg font-black ${RARITY_COLOR[rarity]}`}>
+                    {RARITY_LABEL[rarity]}
+                  </h2>
+                  <span className="text-zinc-600 text-sm">
+                    {cards.length} carta{cards.length !== 1 ? "s" : ""}
+                  </span>
+                </div>
+                <div className="grid grid-cols-5 gap-x-48 gap-y-8">
+                  {cards.map((card, i) => (
+                    <CardDisplay key={`${card.id}-${i}`} card={card} />
+                  ))}
+                </div>
+              </section>
+            );
+          })}
+        </div>
 
-        {/* ── COLECCIÓN AGRUPADA POR RAREZA ──────────────────── */}
-        {RARITY_ORDER.map((rarity) => {
-          const cards = grouped[rarity];
-          if (!cards.length) return null;
-
-          return (
-            <section key={rarity} className="flex flex-col gap-4">
-              <div className="flex items-baseline gap-3">
-                <h2 className={`text-lg font-black ${RARITY_COLOR[rarity]}`}>
-                  {RARITY_LABEL[rarity]}
-                </h2>
-                <span className="text-zinc-600 text-sm">
-                  {cards.length} carta{cards.length !== 1 ? "s" : ""}
-                </span>
-              </div>
-
-              <div className="flex flex-wrap gap-4">
-                {cards.map((card, i) => (
-                  <CardDisplay key={`${card.id}-${i}`} card={card} />
-                ))}
-              </div>
-            </section>
-          );
-        })}
+        {/* Columna derecha — campo */}
+        <div className="w-full lg:w-[640px] flex-shrink-0 sticky top-6 pr-16">
+          <h2 className="text-lg font-black text-white mb-4">Mi 11 ideal</h2>
+          <TeamBuilder cards={collection.map(({ cards }) => cards)} />
+        </div>
       </div>
     </main>
   );
