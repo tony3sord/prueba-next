@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Card, Rarity } from "@/actions/open-pack";
+import { saveTeamSlot } from "@/actions/team";
 
 // =============================================================
 // TIPOS
@@ -52,11 +53,19 @@ const SLOTS: Slot[] = [
 
 interface TeamBuilderProps {
   cards: Card[];
+  initialTeam?: Record<string, string>; // slotId → card_id (uuid)
 }
 
-export function TeamBuilder({ cards }: TeamBuilderProps) {
-  // slotId → Card seleccionada
-  const [team, setTeam] = useState<Record<string, Card>>({});
+export function TeamBuilder({ cards, initialTeam = {} }: TeamBuilderProps) {
+  const [team, setTeam] = useState<Record<string, Card>>(() => {
+    const result: Record<string, Card> = {};
+    for (const [slotId, cardId] of Object.entries(initialTeam)) {
+      const card = cards.find((c) => c.id === cardId);
+      if (card) result[slotId] = card;
+    }
+    return result;
+  });
+
   // slot activo para el picker
   const [activeSlot, setActiveSlot] = useState<Slot | null>(null);
 
@@ -81,18 +90,20 @@ export function TeamBuilder({ cards }: TeamBuilderProps) {
     setActiveSlot(slot);
   }
 
-  function handlePickCard(card: Card) {
+  async function handlePickCard(card: Card) {
     if (!activeSlot) return;
     setTeam((prev) => ({ ...prev, [activeSlot.id]: card }));
     setActiveSlot(null);
+    await saveTeamSlot(activeSlot.id, card.id); // ← slotId real, no "ST"
   }
 
-  function handleRemoveCard(slotId: string) {
+  async function handleRemoveCard(slotId: string) {
     setTeam((prev) => {
       const next = { ...prev };
       delete next[slotId];
       return next;
     });
+    await saveTeamSlot(slotId, null); // ← slotId real, no "ST"
   }
 
   const filledCount = Object.keys(team).length;
