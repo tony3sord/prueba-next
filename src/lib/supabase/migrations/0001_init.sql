@@ -119,3 +119,45 @@ insert into public.cards (name, position, club, rarity, rarity_probability, rati
 ('Nicolás González',     'DEL', 'Fiorentina',          'comun',       0.60, 76, 0, DEFAULT),
 ('Ángel Correa',         'DEL', 'Atlético de Madrid',  'comun',       0.60, 76, 0, DEFAULT),
 ('Gerónimo Rulli',       'POR', 'Ajax',                'comun',       0.60, 74, 0, DEFAULT);
+
+-- =============================================================
+-- PACK OPENINGS — Registro de aperturas diarias por usuario
+-- =============================================================
+
+create table public.pack_opens (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null references auth.users(id) on delete cascade,
+  opened_at  timestamptz not null default now()
+);
+
+create index idx_pack_opens_user_id_opened_at on public.pack_opens(user_id, opened_at);
+
+alter table public.pack_opens enable row level security;
+
+create policy "pack_opens_select"
+  on public.pack_opens for select
+  to authenticated
+  using (user_id = auth.uid());
+
+create policy "pack_opens_insert"
+  on public.pack_opens for insert
+  to authenticated
+  with check (user_id = auth.uid());
+create table user_team (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete cascade not null,
+  position varchar(10) not null,
+  card_id uuid references cards(id) on delete set null,  -- uuid, no integer
+  updated_at timestamptz default now(),
+  unique(user_id, position)
+);
+
+alter table user_team enable row level security;
+
+create policy "usuarios ven su propio equipo"
+  on user_team for select
+  using (auth.uid() = user_id);
+
+create policy "usuarios gestionan su propio equipo"
+  on user_team for all
+  using (auth.uid() = user_id);

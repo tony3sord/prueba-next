@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { openPack, type Card } from "@/actions/open-pack";
 import { CardDisplay } from "./CardDisplay";
+import { Button } from "@heroui/react";
 
 // =============================================================
 // ESTADOS DE LA UI
@@ -54,12 +55,13 @@ export function PackAnimation() {
       <div className="flex flex-col items-center gap-6">
         <div className="text-8xl select-none">📦</div>
         <p className="text-zinc-400 text-sm">Cada sobre contiene 5 cartas</p>
-        <button
+        {/* <button
           onClick={handleOpenPack}
           className="px-8 py-3 rounded-full bg-sky-500 hover:bg-sky-400 text-white font-bold text-lg transition-colors"
         >
           Abrir sobre
-        </button>
+        </button> */}
+        <Button onClick={handleOpenPack}>Abrir sobre</Button>
         {error && <p className="text-red-400 text-sm">{error}</p>}
       </div>
     );
@@ -95,12 +97,13 @@ export function PackAnimation() {
 
       {/* Solo mostrar el botón cuando todas las cartas ya se revelaron */}
       {visibleCount === cards.length && (
-        <button
-          onClick={handleReset}
-          className="px-6 py-2.5 rounded-full border border-zinc-600 hover:border-zinc-400 text-zinc-300 hover:text-white text-sm font-medium transition-colors"
-        >
-          Abrir otro sobre
-        </button>
+        // <button
+        //   onClick={handleReset}
+        //   className="px-6 py-2.5 rounded-full border border-zinc-600 hover:border-zinc-400 text-zinc-300 hover:text-white text-sm font-medium transition-colors"
+        // >
+        //   Abrir otro sobre
+        // </button>
+        <Button onClick={handleReset}>Abrir otro sobre</Button>
       )}
     </div>
   );

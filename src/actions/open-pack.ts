@@ -72,6 +72,8 @@ function pickRandomCard(pool: Card[]): Card {
 // SERVER ACTION PRINCIPAL
 // =============================================================
 
+const MAX_DAILY_PACKS = 5;
+
 export async function openPack(): Promise<OpenPackResult> {
   const supabase = await createClient();
 
@@ -85,7 +87,29 @@ export async function openPack(): Promise<OpenPackResult> {
     return { cards: [], error: "No autenticado" };
   }
 
-  // ── 2. Cargar todo el catálogo de cartas ──────────────────
+  // ── 2. Contar aperturas del día para este usuario ──────────
+  const now = new Date();
+  const startOfUtcDay = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+  );
+  const endOfUtcDay = new Date(startOfUtcDay.getTime() + 24 * 60 * 60 * 1000);
+
+  const { count: dailyOpenCount, error: countError } = await supabase
+    .from("pack_opens")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .gte("opened_at", startOfUtcDay.toISOString())
+    .lt("opened_at", endOfUtcDay.toISOString());
+
+  if (countError) {
+    return { cards: [], error: "Error al verificar el límite de apertura" };
+  }
+
+  if ((dailyOpenCount ?? 0) >= MAX_DAILY_PACKS) {
+    return { cards: [], error: "Solo puedes abrir 5 sobres por día" };
+  }
+
+  // ── 3. Cargar todo el catálogo de cartas ──────────────────
   //    (son solo 26 filas, una sola query es más que suficiente)
   const { data: allCards, error: cardsError } = await supabase
     .from("cards")
@@ -137,6 +161,15 @@ export async function openPack(): Promise<OpenPackResult> {
     return { cards: [], error: "Error al guardar las cartas" };
   }
 
-  // ── 6. Devolver las cartas al cliente ─────────────────────
+  // ── 6. Registrar apertura de sobre ────────────────────────
+  const { error: openError } = await supabase
+    .from("pack_opens")
+    .insert({ user_id: user.id });
+
+  if (openError) {
+    return { cards: [], error: "Error al registrar la apertura" };
+  }
+
+  // ── 7. Devolver las cartas al cliente ─────────────────────
   return { cards: drawnCards };
 }
