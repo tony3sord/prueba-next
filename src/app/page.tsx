@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { Button } from "@heroui/react";
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -34,11 +35,14 @@ export default async function HomePage() {
         </Link>
 
         {user && (
-          <Link
-            href="/profile"
-            className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
-          >
-            Ver mi colección
+          // <Link
+          //   href="/profile"
+          //   className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
+          // >
+          //   Ver mi colección
+          // </Link>
+          <Link href="/profile">
+            <Button variant="secondary">Ver mi colección</Button>
           </Link>
         )}
       </section>
