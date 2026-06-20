@@ -1,8 +1,9 @@
 "use server";
 
 import { createClient as createServerClient } from "@/lib/supabase/server";
+import type { TeamSlotId, UserTeamSlot } from "@/types/team";
 
-export async function getTeam() {
+export async function getTeam(): Promise<UserTeamSlot[]> {
   const supabase = await createServerClient();
   const {
     data: { user },
@@ -14,11 +15,11 @@ export async function getTeam() {
     .select("position, card_id")
     .eq("user_id", user.id);
 
-  return data ?? [];
+  return (data as UserTeamSlot[]) ?? [];
 }
 
 // ← Server Action: para guardar/eliminar desde el cliente
-export async function saveTeamSlot(position: string, cardId: string | null) {
+export async function saveTeamSlot(slotId: TeamSlotId, cardId: string | null) {
   const supabase = await createServerClient();
   const {
     data: { user },
@@ -30,12 +31,12 @@ export async function saveTeamSlot(position: string, cardId: string | null) {
       .from("user_team")
       .delete()
       .eq("user_id", user.id)
-      .eq("position", position);
+      .eq("position", slotId);
   } else {
     await supabase.from("user_team").upsert(
       {
         user_id: user.id,
-        position,
+        position: slotId,
         card_id: cardId,
         updated_at: new Date().toISOString(),
       },

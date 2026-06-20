@@ -1,6 +1,4 @@
-"use client";
-
-import type { Card, Rarity } from "@/actions/open-pack";
+import type { Card, Position, Rarity } from "@/types/cards";
 
 // CONFIG DE RAREZA — colores y etiquetas
 
@@ -40,7 +38,7 @@ const RARITY_CONFIG: Record<
   },
 };
 
-const POSITION_LABEL: Record<string, string> = {
+const POSITION_LABEL: Record<Position, string> = {
   POR: "Portero",
   DEF: "Defensor",
   MED: "Mediocampista",

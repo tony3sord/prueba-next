@@ -6,7 +6,12 @@ import { LoginButton } from "./LoginButton";
 // PAGE (Server Component — redirige si ya hay sesión)
 // =============================================================
 
-export default async function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const resolvedSearchParams = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -37,9 +42,15 @@ export default async function LoginPage() {
           <LoginButton />
         </div>
 
-        <p className="text-zinc-700 text-xs text-center">
-          Al continuar aceptás que guardemos tu colección de cartas.
-        </p>
+        {resolvedSearchParams.error ? (
+          <p className="text-red-400 text-xs text-center">
+            {decodeURIComponent(resolvedSearchParams.error)}
+          </p>
+        ) : (
+          <p className="text-zinc-700 text-xs text-center">
+            Al continuar aceptás que guardemos tu colección de cartas.
+          </p>
+        )}
       </div>
     </main>
   );

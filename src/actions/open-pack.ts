@@ -1,29 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-
-// =============================================================
-// TIPOS
-// =============================================================
-
-export type Rarity = "legendario" | "epico" | "raro" | "infrecuente" | "comun";
-
-export interface Card {
-  imagen_url: string;
-  id: string;
-  name: string;
-  position: string;
-  club: string;
-  rarity: Rarity;
-  rarity_probability: number;
-  rating: number;
-  goals_in_wc: number;
-}
-
-export interface OpenPackResult {
-  cards: Card[];
-  error?: string;
-}
+import type { Card, OpenPackResult, Rarity } from "@/types/cards";
 
 // TABLA DE PROBABILIDADES
 //
@@ -130,18 +108,24 @@ export async function openPack(): Promise<OpenPackResult> {
 
   // ── 4. Generar 5 cartas con probabilidad ponderada ────────
   const drawnCards: Card[] = [];
+  const drawnCardIds = new Set<string>();
 
   for (let i = 0; i < CARDS_PER_PACK; i++) {
     const rarity = pickRarity();
     const pool = cardsByRarity[rarity];
+    const poolWithoutDuplicates = pool.filter(
+      (card) => !drawnCardIds.has(card.id),
+    );
 
-    // Si el tier salió vacío (no debería pasar), caemos a común
     const card =
-      pool.length > 0
-        ? pickRandomCard(pool)
-        : pickRandomCard(cardsByRarity["comun"]);
+      poolWithoutDuplicates.length > 0
+        ? pickRandomCard(poolWithoutDuplicates)
+        : pool.length > 0
+          ? pickRandomCard(pool)
+          : pickRandomCard(cardsByRarity["comun"]);
 
     drawnCards.push(card);
+    drawnCardIds.add(card.id);
   }
 
   // ── 5. Guardar las cartas en la colección del usuario ─────

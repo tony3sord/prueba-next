@@ -2,21 +2,14 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { CardDisplay } from "@/components/CardDisplay";
+import { LogoutButton } from "@/components/LogoutButton";
 import { TeamBuilder } from "@/components/TeamBuilder";
-import type { Card, Rarity } from "@/actions/open-pack";
+import type { Card, Rarity } from "@/types/cards";
+import type { TeamSlotId, UserCardRow, UserTeamSlot } from "@/types/team";
 import { Link as HeroLink } from "@heroui/react";
 import { getTeam } from "@/actions/team";
 
 export const dynamic = "force-dynamic";
-
-// =============================================================
-// TIPOS
-// =============================================================
-
-interface UserCard {
-  obtained_at: string;
-  cards: Card;
-}
 
 // =============================================================
 // CONFIG — orden de rareza de mayor a menor
@@ -62,9 +55,10 @@ export default async function ProfilePage() {
   const { data: userCards, error } = await supabase
     .from("user_cards")
     .select("obtained_at, cards(*)")
+    .eq("user_id", user.id)
     .order("obtained_at", { ascending: false });
 
-  const collection = (userCards ?? []) as unknown as UserCard[];
+  const collection = (userCards ?? []) as unknown as UserCardRow[];
 
   // ── Agrupar por rareza ─────────────────────────────────────
   const grouped = collection.reduce<Record<Rarity, Card[]>>(
@@ -78,8 +72,13 @@ export default async function ProfilePage() {
   //Cargar el equipo del user para pasarle al team builder
   const savedTeam = await getTeam();
   const initialTeam = Object.fromEntries(
-    savedTeam.map(({ position, card_id }) => [position, card_id]),
-  );
+    savedTeam
+      .filter(
+        (slot): slot is UserTeamSlot & { card_id: string } =>
+          slot.card_id !== null,
+      )
+      .map(({ position, card_id }) => [position, card_id]),
+  ) as Record<TeamSlotId, string>;
 
   // ── Stats ──────────────────────────────────────────────────
   const total = collection.length;
@@ -101,12 +100,15 @@ export default async function ProfilePage() {
           Esta es tu colección, {name}!
         </span>
 
-        <HeroLink
-          href="/pack"
-          className="text-sm text-sky-400 hover:text-sky-300 font-medium transition-colors"
-        >
-          Abrir sobre →
-        </HeroLink>
+        <div className="flex items-center gap-4">
+          <HeroLink
+            href="/pack"
+            className="text-sm text-sky-400 hover:text-sky-300 font-medium transition-colors"
+          >
+            Abrir sobre →
+          </HeroLink>
+          <LogoutButton />
+        </div>
       </header>
       <div className="flex flex-col lg:flex-row gap-32 justify-between items-start px-0 py-10 w-full">
         {/* Columna izquierda — colección */}

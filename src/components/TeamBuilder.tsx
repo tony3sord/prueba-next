@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import type { Card, Rarity } from "@/actions/open-pack";
+import type { Card, Position, Rarity } from "@/types/cards";
+import type { TeamSlotId } from "@/types/team";
 import { saveTeamSlot } from "@/actions/team";
 
 // =============================================================
@@ -9,8 +10,8 @@ import { saveTeamSlot } from "@/actions/team";
 // =============================================================
 
 interface Slot {
-  id: string;
-  position: string; // POR | DEF | MED | DEL
+  id: TeamSlotId;
+  position: Position; // POR | DEF | MED | DEL
   x: number; // % horizontal sobre el SVG
   y: number; // % vertical sobre el SVG
   label: string; // etiqueta visual del slot
@@ -53,21 +54,23 @@ const SLOTS: Slot[] = [
 
 interface TeamBuilderProps {
   cards: Card[];
-  initialTeam?: Record<string, string>; // slotId → card_id (uuid)
+  initialTeam?: Partial<Record<TeamSlotId, string>>; // slotId → card_id (uuid)
 }
 
 export function TeamBuilder({ cards, initialTeam = {} }: TeamBuilderProps) {
-  const [team, setTeam] = useState<Record<string, Card>>(() => {
-    const result: Record<string, Card> = {};
+  const [team, setTeam] = useState<Partial<Record<TeamSlotId, Card>>>(() => {
+    const result: Partial<Record<TeamSlotId, Card>> = {};
     for (const [slotId, cardId] of Object.entries(initialTeam)) {
       const card = cards.find((c) => c.id === cardId);
-      if (card) result[slotId] = card;
+      if (card) result[slotId as TeamSlotId] = card;
     }
     return result;
   });
 
   // slot activo para el picker
   const [activeSlot, setActiveSlot] = useState<Slot | null>(null);
+  const [savingSlotId, setSavingSlotId] = useState<TeamSlotId | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // Cartas ya usadas en el equipo
   const usedCardIds = new Set(Object.values(team).map((c) => c.id));
@@ -87,23 +90,51 @@ export function TeamBuilder({ cards, initialTeam = {} }: TeamBuilderProps) {
     : [];
 
   function handleSlotClick(slot: Slot) {
+    if (savingSlotId) return;
+    setError(null);
     setActiveSlot(slot);
   }
 
   async function handlePickCard(card: Card) {
     if (!activeSlot) return;
-    setTeam((prev) => ({ ...prev, [activeSlot.id]: card }));
+
+    const slotId = activeSlot.id;
+    const previousTeam = team;
+    setSavingSlotId(slotId);
+    setError(null);
+    setTeam((prev) => ({ ...prev, [slotId]: card }));
     setActiveSlot(null);
-    await saveTeamSlot(activeSlot.id, card.id); // ← slotId real, no "ST"
+
+    try {
+      await saveTeamSlot(slotId, card.id);
+    } catch (saveError) {
+      console.error(saveError);
+      setTeam(previousTeam);
+      setError("No se pudo guardar el equipo. Intentá nuevamente.");
+    } finally {
+      setSavingSlotId(null);
+    }
   }
 
-  async function handleRemoveCard(slotId: string) {
+  async function handleRemoveCard(slotId: TeamSlotId) {
+    const previousTeam = team;
+    setSavingSlotId(slotId);
+    setError(null);
     setTeam((prev) => {
       const next = { ...prev };
       delete next[slotId];
       return next;
     });
-    await saveTeamSlot(slotId, null); // ← slotId real, no "ST"
+
+    try {
+      await saveTeamSlot(slotId, null);
+    } catch (saveError) {
+      console.error(saveError);
+      setTeam(previousTeam);
+      setError("No se pudo eliminar la carta. Intentá nuevamente.");
+    } finally {
+      setSavingSlotId(null);
+    }
   }
 
   const filledCount = Object.keys(team).length;
@@ -320,6 +351,11 @@ export function TeamBuilder({ cards, initialTeam = {} }: TeamBuilderProps) {
               </button>
             </div>
 
+            {savingSlotId && (
+              <p className="text-zinc-400 text-xs">Guardando cambios...</p>
+            )}
+            {error && <p className="text-red-400 text-sm">{error}</p>}
+
             {availableCards.length === 0 ? (
               <p className="text-zinc-500 text-sm">
                 No tenés {activeSlot.label}s disponibles en tu colección.
@@ -330,7 +366,10 @@ export function TeamBuilder({ cards, initialTeam = {} }: TeamBuilderProps) {
                   <button
                     key={card.id}
                     onClick={() => handlePickCard(card)}
-                    className="flex items-center gap-3 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 hover:border-zinc-500 rounded-xl px-4 py-3 text-left transition-colors"
+                    disabled={savingSlotId !== null}
+                    className={`flex items-center gap-3 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 hover:border-zinc-500 rounded-xl px-4 py-3 text-left transition-colors ${
+                      savingSlotId ? "opacity-60 cursor-not-allowed" : ""
+                    }`}
                   >
                     <div
                       className="w-2 h-2 rounded-full flex-shrink-0"
@@ -355,6 +394,11 @@ export function TeamBuilder({ cards, initialTeam = {} }: TeamBuilderProps) {
         ) : (
           <>
             <h3 className="text-white font-bold">Mi 11 ideal</h3>
+
+            {savingSlotId && (
+              <p className="text-zinc-400 text-xs">Guardando cambios...</p>
+            )}
+            {error && <p className="text-red-400 text-sm">{error}</p>}
 
             {/* Lista de elegidos */}
             <div className="flex flex-col gap-2">
