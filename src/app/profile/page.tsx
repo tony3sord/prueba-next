@@ -87,7 +87,9 @@ export default async function ProfilePage() {
         >
           ← Inicio
         </Link>
-        <span className="text-sm font-medium">{name}</span>
+        <span className="text-sm font-medium">
+          Este es tu colección, {name}!
+        </span>
         <Link
           href="/pack"
           className="text-sm text-sky-400 hover:text-sky-300 font-medium transition-colors"
